@@ -1,4 +1,4 @@
-from sensor.exception import SensorException
+from sensor.exception import ApplicationException
 from sensor.logger import logging
 from sensor.entity.config_entity import DataIngestionConfig
 from sensor.entity.artifact_entity import DataIngestionArtifact
@@ -8,6 +8,7 @@ from pandas import DataFrame
 from sensor.data_access.sensor_data import SensorData
 from sensor.utils.main_utils import read_yaml_file
 from sensor.constant.training_pipeline import SCHEMA_FILE_PATH
+import sys 
 class DataIngestion:
 
     def __init__(self,data_ingestion_config:DataIngestionConfig):
@@ -15,7 +16,7 @@ class DataIngestion:
             self.data_ingestion_config=data_ingestion_config
             self._schema_config = read_yaml_file(SCHEMA_FILE_PATH)
         except Exception as e:
-            raise SensorException(e,sys)
+            raise ApplicationException(e,sys)
 
     def export_data_into_feature_store(self) -> DataFrame:
         """
@@ -31,9 +32,12 @@ class DataIngestion:
             dir_path = os.path.dirname(feature_store_file_path)
             os.makedirs(dir_path,exist_ok=True)
             dataframe.to_csv(feature_store_file_path,index=False,header=True)
+            
+            logging.info("Exported dataframe")
             return dataframe
+        
         except  Exception as e:
-            raise  SensorException(e,sys)
+            raise  ApplicationException(e,sys)
 
     def split_data_as_train_test(self, dataframe: DataFrame) -> None:
         """
@@ -79,4 +83,4 @@ class DataIngestion:
             test_file_path=self.data_ingestion_config.testing_file_path)
             return data_ingestion_artifact
         except Exception as e:
-            raise SensorException(e,sys)
+            raise ApplicationException(e,sys)

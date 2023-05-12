@@ -6,7 +6,10 @@ import pandas as pd
 import json
 from sensor.configuration.mongo_db_connection import MongoDBClient
 from sensor.constant.database import DATABASE_NAME
-from sensor.exception import SensorException
+from sensor.exception import ApplicationException
+
+
+
 
 
 class SensorData:
@@ -15,13 +18,14 @@ class SensorData:
     """
 
     def __init__(self):
-        """
-        """
         try:
+            
+            
             self.mongo_client = MongoDBClient(database_name=DATABASE_NAME)
+            print("Mongo Client initialized successfully.")
 
         except Exception as e:
-            raise SensorException(e, sys)
+            raise ApplicationException(e,sys)
 
 
     def save_csv_file(self,file_path ,collection_name: str, database_name: Optional[str] = None):
@@ -36,7 +40,7 @@ class SensorData:
             collection.insert_many(records)
             return len(records)
         except Exception as e:
-            raise SensorException(e, sys)
+            raise ApplicationException(e, sys)
 
 
     def export_collection_as_dataframe(
@@ -60,4 +64,4 @@ class SensorData:
             return df
 
         except Exception as e:
-            raise SensorException(e, sys)
+            raise ApplicationException(e, sys)
