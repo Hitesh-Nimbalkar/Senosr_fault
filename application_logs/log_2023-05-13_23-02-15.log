@@ -1,0 +1,18 @@
+[2023-05-13 23:02:17,220] root - INFO - Starting data ingestion
+[2023-05-13 23:02:17,246] root - INFO - Exporting data from mongodb to feature store
+[2023-05-13 23:02:22,382] root - INFO - Exported dataframe
+[2023-05-13 23:02:22,658] root - INFO - Performed train test split on the dataframe
+[2023-05-13 23:02:22,658] root - INFO - Exited split_data_as_train_test method of Data_Ingestion class
+[2023-05-13 23:02:22,659] root - INFO - Exporting train and test file path.
+[2023-05-13 23:02:24,136] root - INFO - Exported train and test file path.
+[2023-05-13 23:02:24,360] root - INFO - Data ingestion completed and artifact: DataIngestionArtifact(trained_file_path='artifact\\05_13_2023_23_02_15\\data_ingestion\\ingested\\train.csv', test_file_path='artifact\\05_13_2023_23_02_15\\data_ingestion\\ingested\\test.csv')
+[2023-05-13 23:02:24,737] root - INFO - Required number of columns: 164
+[2023-05-13 23:02:24,737] root - INFO - Data frame has columns: 164
+[2023-05-13 23:02:24,737] root - INFO - Required number of columns: 164
+[2023-05-13 23:02:24,737] root - INFO - Data frame has columns: 164
+[2023-05-13 23:02:24,737] root - INFO - Missing numerical columns: [[]]
+[2023-05-13 23:02:24,737] root - INFO - Missing numerical columns: [[]]
+[2023-05-13 23:02:25,508] root - INFO - Data validation artifact: DataValidationArtifact(validation_status=False, valid_train_file_path='artifact\\05_13_2023_23_02_15\\data_ingestion\\ingested\\train.csv', valid_test_file_path='artifact\\05_13_2023_23_02_15\\data_ingestion\\ingested\\test.csv', invalid_train_file_path=None, invalid_test_file_path=None, drift_report_file_path='artifact\\05_13_2023_23_02_15\\data_validation\\drift_report\\report.yaml')
+[2023-05-13 23:02:38,175] root - INFO - Entered the save_object method of MainUtils class
+[2023-05-13 23:02:38,176] root - INFO - Exited the save_object method of MainUtils class
+[2023-05-13 23:02:38,176] root - INFO - Data transformation artifact: DataTransformationArtifact(transformed_object_file_path='artifact\\05_13_2023_23_02_15\\data_transformation\\transformed_object\\preprocessing.pkl', transformed_train_file_path='artifact\\05_13_2023_23_02_15\\data_transformation\\transformed\\train.npy', transformed_test_file_path='artifact\\05_13_2023_23_02_15\\data_transformation\\transformed\\test.npy')

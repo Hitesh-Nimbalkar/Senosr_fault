@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="E:\Ineuron may batch projects\Projects\Aps_sensor\Aps_Sensor\.venv"
+VIRTUAL_ENV="D:\Ineuron may batch projects\Projects\Aps_sensor\Aps_Sensor\.venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

@@ -1,5 +1,5 @@
 from sensor.entity.artifact_entity import ClassificationMetricArtifact
-from sensor.exception import SensorException
+from sensor.exception import ApplicationException
 from sklearn.metrics import f1_score,precision_score,recall_score
 import os,sys
 
@@ -14,4 +14,4 @@ def get_classification_score(y_true,y_pred)->ClassificationMetricArtifact:
                     recall_score=model_recall_score)
         return classsification_metric
     except Exception as e:
-        raise SensorException(e,sys)
+        raise ApplicationException(e,sys)

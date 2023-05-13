@@ -1,0 +1,2 @@
+[2023-05-13 22:50:21,428] root - INFO - Starting data ingestion
+[2023-05-13 22:50:21,444] root - INFO - Exporting data from mongodb to feature store
