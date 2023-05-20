@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>CSV File Predictor</title>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#upload-form").submit(function(event) {
+				event.preventDefault();
+				var formData = new FormData($(this)[0]);
+
+				$.ajax({
+					url: "http://localhost:8000/predict",
+					type: "POST",
+					data: formData,
+					contentType: false,
+					processData: false,
+					success: function(data) {
+						var tableHtml = "<table><tr>";
+						for (var col in data[0]) {
+							tableHtml += "<th>" + col + "</th>";
+						}
+						tableHtml += "</tr>";
+
+						for (var i=0; i<data.length; i++) {
+							tableHtml += "<tr>";
+							for (var col in data[i]) {
+								tableHtml += "<td>" + data[i][col] + "</td>";
+							}
+							tableHtml += "</tr>";
+						}
+						tableHtml += "</table>";
+
+						$("#result-div").html(tableHtml);
+					},
+					error: function(jqXHR, textStatus, errorThrown) {
+						alert("Error occurred: " + errorThrown);
+					}
+				});
+			});
+		});
+	</script>
+</head>
+
+<body>
+	<h1>CSV File Predictor</h1>
+
+	<form id="upload-form" enctype="multipart/form-data">
+		<label for="csv-file">Upload CSV file:</label>
+		<input type="file" name="file" id="csv-file">
+		<input type="submit" value="Submit">
+	</form>
+
+	<div id="result-div"></div>
+</body>
+</html>
