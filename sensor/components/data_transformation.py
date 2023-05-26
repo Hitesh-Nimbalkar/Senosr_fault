@@ -6,7 +6,7 @@ from imblearn.combine import SMOTETomek
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import RobustScaler
 from sklearn.pipeline import Pipeline
-
+import os
 
 from sensor.constant.training_pipeline import TARGET_COLUMN
 from sensor.entity.artifact_entity import (
@@ -103,6 +103,12 @@ class DataTransformation:
             save_numpy_array_data( self.data_transformation_config.transformed_train_file_path, array=train_arr, )
             save_numpy_array_data( self.data_transformation_config.transformed_test_file_path,array=test_arr,)
             save_object( self.data_transformation_config.transformed_object_file_path, preprocessor_object,)
+            ## Save object.
+            path=os.getcwd()
+            preprocessor='preprocessor.pkl'
+            file_path=os.path.join(path,preprocessor)
+            print(file_path)
+            save_object(file_path,preprocessor_object)
             
             
             #preparing artifact
