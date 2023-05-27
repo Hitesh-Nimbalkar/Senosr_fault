@@ -5,6 +5,7 @@ from sensor.logger import logging
 from sensor.entity.artifact_entity import DataTransformationArtifact,ModelTrainerArtifact
 from sensor.entity.config_entity import ModelTrainerConfig
 import os,sys
+from sklearn.model_selection import GridSearchCV
 from xgboost import XGBClassifier
 from sensor.ml.metric.classification_metric import get_classification_score
 from sensor.ml.model.estimator import SensorModel
@@ -22,16 +23,52 @@ class ModelTrainer:
         except Exception as e:
             raise ApplicationException(e,sys)
 
-    def perform_hyper_paramter_tunig(self):...
-    
-
-    def train_model(self,x_train,y_train):
+    def perform_hyperparameter_tuning(self,x_train, y_train):
         try:
+            # Define the parameter grid for hyperparameter tuning
+            param_grid = {
+                'learning_rate': [0.1,0.2,0.3],
+                'max_depth': [3,5,12],
+                'min_child_weight': [1, 2, 3]
+            }
+            
+            # Create an XGBoost classifier
             xgb_clf = XGBClassifier()
-            xgb_clf.fit(x_train,y_train)
+            
+            # Perform grid search cross-validation with the defined parameter grid
+            grid_search = GridSearchCV(estimator=xgb_clf, param_grid=param_grid, scoring='accuracy', cv=3)
+            
+            # Fit the grid search object to the training data
+            logging.info("Performing hyperparameter tuning...")
+            grid_search.fit(x_train, y_train)
+            
+            # Retrieve the best parameters found during hyperparameter tuning
+            best_params = grid_search.best_params_
+            logging.info("Best parameters: %s", best_params)
+            
+            logging.info("Hyperparameter tuning completed.")
+            
+            return best_params
+        except Exception as e:
+            logging.error("An error occurred during hyperparameter tuning.")
+            raise ApplicationException(e,sys)
+
+
+    def train_model(self,x_train, y_train, best_params):
+        try:
+            # Create an XGBoost classifier with the best parameters
+            xgb_clf = XGBClassifier(**best_params)
+            
+            # Fit the classifier to the training data
+            logging.info("Training the model...")
+            xgb_clf.fit(x_train, y_train)
+            
+            logging.info("Model training completed.")
+            
             return xgb_clf
         except Exception as e:
-            raise e
+            logging.error("An error occurred during model training.")
+            raise ApplicationException(e,sys)
     
     def initiate_model_trainer(self)->ModelTrainerArtifact:
         try:
@@ -48,9 +85,10 @@ class ModelTrainer:
                 test_arr[:, :-1],
                 test_arr[:, -1],
             )
-
-            model = self.train_model(x_train, y_train)
-            y_train_pred = model.predict(x_train)
+            
+            best_params = self.perform_hyperparameter_tuning(x_train, y_train)
+            model = self.train_model(x_train, y_train, best_params)
+            y_train_pred = model.predict(x_test)
 
             
             classification_train_metric =  get_classification_score(y_true=y_train, y_pred=y_train_pred)

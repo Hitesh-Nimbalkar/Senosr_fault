@@ -114,7 +114,8 @@ def train_pipeline():
     except ApplicationException as e:
         return str(e)
 
-
+training_pipeline = TrainPipeline()
+training_pipeline.run_pipeline()
     
 @app.get('/upload')
 def bucket_upload():
