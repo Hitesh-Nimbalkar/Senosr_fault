@@ -105,8 +105,9 @@ class DataTransformation:
             save_object( self.data_transformation_config.transformed_object_file_path, preprocessor_object,)
             ## Save object.
             path=os.getcwd()
+            processor_directory='preprocessor'
             preprocessor='preprocessor.pkl'
-            file_path=os.path.join(path,preprocessor)
+            file_path=os.path.join(path,processor_directory,preprocessor)
             print(file_path)
             save_object(file_path,preprocessor_object)
             

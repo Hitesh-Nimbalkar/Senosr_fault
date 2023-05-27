@@ -3,12 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 from starlette.requests import Request
-from sensor.configuration.mongo_db_connection import MongoDBClient
 from sensor.exception import ApplicationException
 from sensor.logger import logging
 from sensor.pipeline.train import TrainPipeline
 from sensor.constant.training_pipeline import SAVED_MODEL_DIR, SCHEMA_FILE_PATH
-from sensor.ml.model.estimator import ModelResolver, TargetValueMapping
+from sensor.ml.model.estimator import ModelResolver
 from sensor.utils.main_utils import read_yaml_file, load_object
 import os
 import pandas as pd
@@ -16,6 +15,9 @@ from uvicorn import run as app_run
 import io
 import sys
 import numpy as np
+from flask import Flask, jsonify
+from sensor.ml.model.estimator import TargetValueMapping
+
 
 from sensor.pipeline.S3_upload import S3_upload
 
@@ -30,6 +32,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+# Define the prediction directory path
+PREDICTION_DIR = "./prediction_directory"
 
 @app.get("/")
 async def get_index_html(request: Request):
@@ -40,48 +44,55 @@ async def predict_route(file: UploadFile):
     try:
         # Read contents of uploaded CSV file
         contents = await file.read()
-        
+
         # Convert CSV file to DataFrame
         df = pd.read_csv(io.StringIO(contents.decode('utf-8')))
-        
+
+        # Create the prediction directory if it doesn't exist
+        os.makedirs(PREDICTION_DIR, exist_ok=True)
+
         # Drop specified columns if schema is available
         schema = read_yaml_file(SCHEMA_FILE_PATH)
         drop_columns = schema.get("drop_columns", [])
         print(drop_columns)
-        
+
         df.drop(columns=drop_columns, axis=1, inplace=True)
         df.replace({"na": np.nan}, inplace=True)
-        X_train=df.drop('class',axis=1)
-        df.to_csv("before_preprocessor.csv",index=False)
+        X_train = df.drop('class', axis=1)
+        df.to_csv(os.path.join(PREDICTION_DIR, "before_preprocessor.csv"), index=False)
+
         # Apply data transformations if available
-        preprocessor = load_object(file_path='preprocessor.pkl')
-        
+        preprocessor = load_object(file_path='preprocessor/preprocessor.pkl')
+
         # Apply transformations using preprocessor
         X_array = preprocessor.transform(X_train)
+
         # Load and use the best model for prediction
         model_resolver = ModelResolver(model_dir=SAVED_MODEL_DIR)
         if not model_resolver.is_model_exists():
             return JSONResponse(content={"message": "Model is not available"}, status_code=404)
-        
+
         best_model_path = model_resolver.get_best_model_path()
         model = load_object(file_path=best_model_path)
-        
+
         # Make predictions
         y_pred = model.predict(X_array)
+        # Map 0 to neg and 1 to pos
+        y_pred_mapped = ["neg" if pred == 0 else "pos" for pred in y_pred]
+
+        # Create a DataFrame from y_train_pred
+        df1 = pd.DataFrame(y_pred_mapped, columns=['class'])
+
+        # Save the predicted DataFrame to a CSV file
+        predicted_csv_path = os.path.join(PREDICTION_DIR, "y_prediction.csv")
+        df1.to_csv(predicted_csv_path, index=False)
         
-        # Add predicted column to the DataFrame
-        df['class_predicted'] = y_pred
         
-        # Save the predicted DataFrame to a file
-        df.to_csv('predicted_data.csv', index=False)
-        
-        # Return the DataFrame as JSON response
-        response_content = df.to_dict(orient='records')
-        
-        message="prediction_done"
-        
+
+        message = "prediction_done"
+
         return message
-        
+
     except Exception as e:
         return JSONResponse(content={"message": f"Error occurred! {e}"}, status_code=500)
 
@@ -95,9 +106,15 @@ def train_pipeline():
     try:
         training_pipeline = TrainPipeline()
         training_pipeline.run_pipeline()
-        return "Training pipeline completed successfully"
+        response = {
+            'message': 'Training pipeline completed successfully!'
+        }
+        
+        return jsonify(response)
     except ApplicationException as e:
         return str(e)
+
+
     
 @app.get('/upload')
 def bucket_upload():

@@ -33,6 +33,20 @@
         button:hover {
             background-color: #45a049;
         }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 2s linear infinite;
+            display: none;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -61,18 +75,32 @@
         <hr>
 
         <h2><i class="fas fa-clipboard-list"></i> Result</h2>
-        <div id="result"></div>
-
-        <hr>
+        <div id="result">
+            <div class="loader"></div>
+        </div>
 
     </div>
 
     <script>
         // Function to fetch the result from the Flask API
         async function getResult(url) {
-            const response = await fetch(url);
-            const data = await response.json();
-            document.getElementById('result').innerHTML = data.message;
+            const resultContainer = document.getElementById('result');
+            const loader = resultContainer.querySelector('.loader');
+            
+            // Show the loading animation
+            loader.style.display = 'block';
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                resultContainer.innerHTML = data.message;
+            } catch (error) {
+                console.error('Error:', error);
+                resultContainer.innerHTML = 'An error occurred.';
+            } finally {
+                // Hide the loading animation
+                loader.style.display = 'none';
+            }
         }
 
         // Event listener for the train form submission
